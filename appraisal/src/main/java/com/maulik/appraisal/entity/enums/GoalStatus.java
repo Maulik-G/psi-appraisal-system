@@ -1,4 +1,4 @@
-package com.maulik.appraisal.entity;
+package com.maulik.appraisal.entity.enums;
 
 public enum GoalStatus {
     NOT_STARTED,

@@ -1,5 +1,6 @@
 package com.maulik.appraisal.entity;
 
+import com.maulik.appraisal.entity.enums.AppraisalStatus;
 import jakarta.persistence.*;
 import lombok.*;
 

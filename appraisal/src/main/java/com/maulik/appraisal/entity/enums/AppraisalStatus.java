@@ -1,4 +1,4 @@
-package com.maulik.appraisal.entity;
+package com.maulik.appraisal.entity.enums;
 
 public enum AppraisalStatus {
     PENDING,

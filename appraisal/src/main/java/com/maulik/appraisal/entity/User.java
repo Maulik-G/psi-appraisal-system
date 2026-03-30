@@ -1,5 +1,7 @@
 package com.maulik.appraisal.entity;
 
+import com.maulik.appraisal.entity.enums.Role;
+
 import jakarta.persistence.*;
 import lombok.*;
 import org.springframework.security.core.GrantedAuthority;
