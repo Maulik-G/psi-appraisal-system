@@ -1,7 +1,7 @@
 package com.maulik.appraisal.repository;
 
 import com.maulik.appraisal.entity.User;
-import com.maulik.appraisal.entity.Role;
+import com.maulik.appraisal.entity.enums.Role;
 import org.springframework.data.jpa.repository.JpaRepository;
 import java.util.List;
 import java.util.Optional;

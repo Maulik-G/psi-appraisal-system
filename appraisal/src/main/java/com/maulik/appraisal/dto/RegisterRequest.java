@@ -1,6 +1,6 @@
 package com.maulik.appraisal.dto;
 
-import com.maulik.appraisal.entity.Role;
+import com.maulik.appraisal.entity.enums.Role;
 import lombok.Data;
 
 @Data

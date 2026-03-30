@@ -1,7 +1,7 @@
 package com.maulik.appraisal.repository;
 
 import com.maulik.appraisal.entity.Feedback;
-import com.maulik.appraisal.entity.FeedbackType;
+import com.maulik.appraisal.entity.enums.FeedbackType;
 import org.springframework.data.jpa.repository.JpaRepository;
 import java.util.List;
 

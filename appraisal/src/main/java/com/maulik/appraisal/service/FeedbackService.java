@@ -2,6 +2,7 @@ package com.maulik.appraisal.service;
 
 import com.maulik.appraisal.dto.*;
 import com.maulik.appraisal.entity.*;
+import com.maulik.appraisal.entity.enums.*;
 import com.maulik.appraisal.repository.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;

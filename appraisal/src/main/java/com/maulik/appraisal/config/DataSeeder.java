@@ -1,7 +1,7 @@
 package com.maulik.appraisal.config;
 
 import com.maulik.appraisal.entity.Department;
-import com.maulik.appraisal.entity.Role;
+import com.maulik.appraisal.entity.enums.Role;
 import com.maulik.appraisal.entity.User;
 import com.maulik.appraisal.repository.DepartmentRepository;
 import com.maulik.appraisal.repository.UserRepository;
