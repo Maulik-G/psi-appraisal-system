@@ -40,10 +40,12 @@ public class SecurityConfig {
             .sessionManagement(s -> s.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
             .authorizeHttpRequests(auth -> auth
                 // Public — login only
-                .requestMatchers("/api/auth/**").permitAll()    
+                .requestMatchers("/api/auth/**").permitAll()
+
+                    .requestMatchers(HttpMethod.POST, "/api/users").permitAll()
 
                 // HR only
-                .requestMatchers(HttpMethod.POST,   "/api/users").hasRole("HR")
+//                .requestMatchers(HttpMethod.POST,   "/api/users").hasRole("HR")
                 .requestMatchers(HttpMethod.PUT,    "/api/users/**").hasRole("HR")
                 .requestMatchers(HttpMethod.DELETE, "/api/users/**").hasRole("HR")
                 .requestMatchers(HttpMethod.POST,   "/api/departments/**").hasRole("HR")

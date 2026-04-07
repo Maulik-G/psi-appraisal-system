@@ -6,6 +6,8 @@ import lombok.Setter;
 
 import java.time.LocalDate;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
+
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 
@@ -17,9 +19,11 @@ public class CreateAppraisalRequest {
     private String cycleName;
 
     @NotNull(message = "Cycle start date is required")
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
     private LocalDate cycleStartDate;
 
     @NotNull(message = "Cycle end date is required")
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
     private LocalDate cycleEndDate;
 
     @NotNull(message = "Employee ID is required")

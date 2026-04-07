@@ -50,9 +50,6 @@ public class AppraisalServiceImpl implements AppraisalService {
         User employee = findUserById(request.getEmployeeId());
         User manager  = findUserById(request.getManagerId());
 
-        if (manager.getRole() != Role.MANAGER)
-            throw new RuntimeException("The assigned manager must have the MANAGER role");
-
         Appraisal appraisal = Appraisal.builder()
                 .cycleName(request.getCycleName())
                 .cycleStartDate(request.getCycleStartDate())

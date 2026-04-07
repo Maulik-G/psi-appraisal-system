@@ -7,6 +7,8 @@ import lombok.Setter;
 
 import java.time.LocalDate;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
+
 @Getter
 @Setter
 public class BulkCycleRequest {
@@ -15,9 +17,11 @@ public class BulkCycleRequest {
     private String cycleName;
 
     @NotNull(message = "Cycle start date is required")
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
     private LocalDate cycleStartDate;
 
     @NotNull(message = "Cycle end date is required")
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
     private LocalDate cycleEndDate;
 
     // Optional — if set, only create for employees in this department
