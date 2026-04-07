@@ -45,5 +45,6 @@ public class AppraisalResponse {
     private AppraisalStatus appraisalStatus;
     private LocalDateTime submittedAt;
     private LocalDateTime approvedAt;
+    private String hrComments;
     private LocalDateTime createdAt;
 }

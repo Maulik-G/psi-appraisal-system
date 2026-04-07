@@ -12,6 +12,7 @@ import com.psi.appraisal.repository.AppraisalRepository;
 import com.psi.appraisal.repository.GoalRepository;
 import com.psi.appraisal.services.GoalService;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -20,6 +21,7 @@ import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class GoalServiceImpl implements GoalService {
 
     private final GoalRepository goalRepository;
@@ -28,10 +30,15 @@ public class GoalServiceImpl implements GoalService {
     @Override
     @Transactional
     public GoalResponse createGoal(CreateGoalRequest request, Long managerId) {
+        log.info("Creating goal: title={}, appraisalId={}, managerId={}", 
+                request.getTitle(), request.getAppraisalId(), managerId);
+        
         Appraisal appraisal = appraisalRepository.findByIdWithDetails(request.getAppraisalId())
                 .orElseThrow(() -> new ResourceNotFoundException("Appraisal", request.getAppraisalId()));
 
         if (!appraisal.getManager().getId().equals(managerId)) {
+            log.error("Manager ID mismatch: appraisal.managerId={}, provided managerId={}", 
+                    appraisal.getManager().getId(), managerId);
             throw new UnauthorizedAccessException(
                     "Access denied: you are not the manager for this appraisal");
         }
@@ -44,7 +51,13 @@ public class GoalServiceImpl implements GoalService {
                 .dueDate(request.getDueDate())
                 .build();
 
-        goalRepository.save(goal);
+        try {
+            goalRepository.save(goal);
+            log.info("Goal saved successfully with ID: {}", goal.getId());
+        } catch (Exception e) {
+            log.error("Failed to save goal to database: {}", e.getMessage(), e);
+            throw new RuntimeException("Database error: Could not save goal. check logs.");
+        }
         return mapToResponse(goal);
     }
 
@@ -72,9 +85,12 @@ public class GoalServiceImpl implements GoalService {
     @Override
     @Transactional
     public GoalResponse updateGoal(Long goalId, UpdateGoalRequest request, Long managerId) {
+        log.info("Updating goal ID: {}, managerId={}", goalId, managerId);
         Goal goal = findById(goalId);
 
         if (!goal.getAppraisal().getManager().getId().equals(managerId)) {
+            log.error("Update denied: goal.managerId={}, provided managerId={}", 
+                    goal.getAppraisal().getManager().getId(), managerId);
             throw new UnauthorizedAccessException(
                     "Access denied: only the manager can update this goal");
         }
@@ -83,7 +99,13 @@ public class GoalServiceImpl implements GoalService {
         if (request.getDescription() != null) goal.setDescription(request.getDescription());
         if (request.getDueDate() != null) goal.setDueDate(request.getDueDate());
 
-        goalRepository.save(goal);
+        try {
+            goalRepository.save(goal);
+            log.info("Goal updated successfully");
+        } catch (Exception e) {
+            log.error("Failed to update goal: {}", e.getMessage(), e);
+            throw new RuntimeException("Database error: Could not update goal.");
+        }
         return mapToResponse(goal);
     }
 

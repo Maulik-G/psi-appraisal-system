@@ -1,6 +1,7 @@
 package com.psi.appraisal.services.impl;
 
 import com.psi.appraisal.dtos.AppraisalResponse;
+import com.psi.appraisal.dtos.ApproveRequest;
 import com.psi.appraisal.dtos.BulkCycleRequest;
 import com.psi.appraisal.dtos.BulkCycleResponse;
 import com.psi.appraisal.dtos.CreateAppraisalRequest;
@@ -283,7 +284,7 @@ public class AppraisalServiceImpl implements AppraisalService {
 
     @Override
     @Transactional
-    public AppraisalResponse approveAppraisal(Long appraisalId) {
+    public AppraisalResponse approveAppraisal(Long appraisalId, ApproveRequest request) {
         Appraisal appraisal = findAppraisalById(appraisalId);
 
         if (appraisal.getAppraisalStatus() != AppraisalStatus.MANAGER_REVIEWED) {
@@ -293,6 +294,7 @@ public class AppraisalServiceImpl implements AppraisalService {
 
         appraisal.setAppraisalStatus(AppraisalStatus.APPROVED);
         appraisal.setApprovedAt(LocalDateTime.now());
+        appraisal.setHrComments(request.getHrComments());
         appraisalRepository.save(appraisal);
 
         notificationService.send(
@@ -386,6 +388,7 @@ public class AppraisalServiceImpl implements AppraisalService {
         response.setAppraisalStatus(appraisal.getAppraisalStatus());
         response.setSubmittedAt(appraisal.getSubmittedAt());
         response.setApprovedAt(appraisal.getApprovedAt());
+        response.setHrComments(appraisal.getHrComments());
         response.setCreatedAt(appraisal.getCreatedAt());
         return response;
     }

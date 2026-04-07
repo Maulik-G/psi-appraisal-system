@@ -29,7 +29,7 @@ import lombok.Setter;
 public class Goal {
 
 	public enum Status{
-		NOT_STARTED, IN_PROGESS, COMPLETED, CANCELLED
+		NOT_STARTED, IN_PROGRESS, COMPLETED, CANCELLED
 	}
 	
 	@Id

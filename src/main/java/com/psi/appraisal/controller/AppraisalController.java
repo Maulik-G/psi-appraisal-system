@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.*;
 
 import com.psi.appraisal.dtos.ApiResponse;
 import com.psi.appraisal.dtos.AppraisalResponse;
+import com.psi.appraisal.dtos.ApproveRequest;
 import com.psi.appraisal.dtos.BulkCycleRequest;
 import com.psi.appraisal.dtos.BulkCycleResponse;
 import com.psi.appraisal.dtos.CreateAppraisalRequest;
@@ -124,9 +125,10 @@ public class AppraisalController {
     // PATCH /api/appraisals/{id}/approve
     @PatchMapping("/{id}/approve")
     public ResponseEntity<ApiResponse<AppraisalResponse>> approveAppraisal(
-            @PathVariable Long id) {
+            @PathVariable Long id,
+            @RequestBody ApproveRequest request) {
 
-        AppraisalResponse response = appraisalService.approveAppraisal(id);
+        AppraisalResponse response = appraisalService.approveAppraisal(id, request);
         return ResponseEntity.ok(ApiResponse.success("Appraisal approved", response));
     }
 

@@ -99,6 +99,9 @@ public class Appraisal {
 	@Column(name = "approved_at")
 	private LocalDateTime approvedAt;
 	
+	@Column(name = "hr_comments", columnDefinition = "TEXT")
+	private String hrComments;
+	
 	@Column(name ="created_at", updatable = false)
 	private LocalDateTime createdAt;
 	

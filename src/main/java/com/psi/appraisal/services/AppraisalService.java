@@ -3,6 +3,7 @@ package com.psi.appraisal.services;
 import java.util.List;
 
 import com.psi.appraisal.dtos.AppraisalResponse;
+import com.psi.appraisal.dtos.ApproveRequest;
 import com.psi.appraisal.dtos.BulkCycleRequest;
 import com.psi.appraisal.dtos.BulkCycleResponse;
 import com.psi.appraisal.dtos.CreateAppraisalRequest;
@@ -39,7 +40,7 @@ public interface AppraisalService {
     AppraisalResponse submitManagerReview(Long appraisalId, ManagerReviewRequest request, Long managerId);
 
     // HR: approve final appraisal — moves status to APPROVED
-    AppraisalResponse approveAppraisal(Long appraisalId);
+    AppraisalResponse approveAppraisal(Long appraisalId, ApproveRequest request);
 
     // Employee: acknowledge result — moves status to ACKNOWLEDGED
     AppraisalResponse acknowledgeAppraisal(Long appraisalId, Long employeeId);

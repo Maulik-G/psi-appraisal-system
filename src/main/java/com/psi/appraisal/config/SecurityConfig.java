@@ -66,7 +66,7 @@ public class SecurityConfig {
                 // Employee + Manager can submit self-assessment (managers can be appraised too)
                 .requestMatchers(HttpMethod.PUT,    "/api/appraisals/*/self-assessment/**").hasAnyRole("EMPLOYEE", "MANAGER")
                 .requestMatchers(HttpMethod.PATCH,  "/api/appraisals/*/acknowledge").hasAnyRole("EMPLOYEE", "MANAGER")
-                .requestMatchers(HttpMethod.PATCH,  "/api/goals/*/progress").hasRole("EMPLOYEE")
+                .requestMatchers(HttpMethod.PATCH,  "/api/goals/*/progress").hasAnyRole("EMPLOYEE", "MANAGER")
                 .requestMatchers("/api/reports/employee/**").hasAnyRole("EMPLOYEE", "HR")
 
                 // Authenticated — any role
