@@ -36,19 +36,22 @@ public class GoalServiceImpl implements GoalService {
         Appraisal appraisal = appraisalRepository.findByIdWithDetails(request.getAppraisalId())
                 .orElseThrow(() -> new ResourceNotFoundException("Appraisal", request.getAppraisalId()));
 
-        if (!appraisal.getManager().getId().equals(managerId)) {
-            log.error("Manager ID mismatch: appraisal.managerId={}, provided managerId={}", 
-                    appraisal.getManager().getId(), managerId);
-            throw new UnauthorizedAccessException(
-                    "Access denied: you are not the manager for this appraisal");
+        if (appraisal.getAppraisalStatus() != AppraisalStatus.DRAFT) {
+            throw new InvalidStatusTransitionException(
+                    "Cannot add goals after they have been approved or submitted for review. Current status: " + appraisal.getAppraisalStatus());
         }
+
+        if (!appraisal.getManager().getId().equals(managerId)) {
 
         Goal goal = Goal.builder()
                 .appraisal(appraisal)
                 .employee(appraisal.getEmployee())
+                .manager(appraisal.getManager())
                 .title(request.getTitle())
                 .description(request.getDescription())
                 .dueDate(request.getDueDate())
+                .progress(0)
+                .progressPercent(0)
                 .build();
 
         try {
@@ -88,12 +91,12 @@ public class GoalServiceImpl implements GoalService {
         log.info("Updating goal ID: {}, managerId={}", goalId, managerId);
         Goal goal = findById(goalId);
 
-        if (!goal.getAppraisal().getManager().getId().equals(managerId)) {
-            log.error("Update denied: goal.managerId={}, provided managerId={}", 
-                    goal.getAppraisal().getManager().getId(), managerId);
-            throw new UnauthorizedAccessException(
-                    "Access denied: only the manager can update this goal");
+        if (goal.getAppraisal().getAppraisalStatus() != AppraisalStatus.DRAFT) {
+            throw new InvalidStatusTransitionException(
+                    "Cannot update goals in status: " + goal.getAppraisal().getAppraisalStatus());
         }
+
+        if (!goal.getAppraisal().getManager().getId().equals(managerId)) {
 
         if (request.getTitle() != null) goal.setTitle(request.getTitle());
         if (request.getDescription() != null) goal.setDescription(request.getDescription());
@@ -128,10 +131,12 @@ public class GoalServiceImpl implements GoalService {
     public void deleteGoal(Long goalId, Long managerId) {
         Goal goal = findById(goalId);
 
-        if (!goal.getAppraisal().getManager().getId().equals(managerId)) {
-            throw new UnauthorizedAccessException(
-                    "Access denied: only the manager can delete this goal");
+        if (goal.getAppraisal().getAppraisalStatus() != AppraisalStatus.DRAFT) {
+            throw new InvalidStatusTransitionException(
+                    "Cannot delete goals in status: " + goal.getAppraisal().getAppraisalStatus());
         }
+
+        if (!goal.getAppraisal().getManager().getId().equals(managerId)) {
 
         goalRepository.delete(goal);
     }

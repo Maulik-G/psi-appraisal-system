@@ -1,11 +1,9 @@
 package com.psi.appraisal.entity.enums;
 
 public enum AppraisalStatus {
-    PENDING,
-    EMPLOYEE_DRAFT,      // employee saved progress but not yet submitted
-    SELF_SUBMITTED,
-    MANAGER_DRAFT,       // manager saved progress but not yet submitted
-    MANAGER_REVIEWED,
-    APPROVED,
-    ACKNOWLEDGED
+    DRAFT,              // Planning goals
+    GOALS_APPROVED,     // Manager approved goals, ready for self-assessment
+    SELF_SUBMITTED,     // Employee submitted self-assessment
+    MANAGER_REVIEWED,   // Manager submitted their review
+    FINALIZED           // Approved by HR and acknowledged
 }

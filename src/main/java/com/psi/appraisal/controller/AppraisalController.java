@@ -73,6 +73,28 @@ public class AppraisalController {
         return ResponseEntity.ok(ApiResponse.success(appraisalService.getAppraisalById(id, requesterId)));
     }
 
+    // ── Employee: submit goals ────────────────────────────────────
+    // PATCH /api/appraisals/{id}/goals/submit?employeeId=1
+    @PatchMapping("/{id}/goals/submit")
+    public ResponseEntity<ApiResponse<AppraisalResponse>> submitGoals(
+            @PathVariable Long id,
+            @RequestParam Long employeeId) {
+
+        AppraisalResponse response = appraisalService.submitGoals(id, employeeId);
+        return ResponseEntity.ok(ApiResponse.success("Goals submitted for approval", response));
+    }
+
+    // ── Manager: approve goals ────────────────────────────────────
+    // PATCH /api/appraisals/{id}/goals/approve?managerId=1
+    @PatchMapping("/{id}/goals/approve")
+    public ResponseEntity<ApiResponse<AppraisalResponse>> approveGoals(
+            @PathVariable Long id,
+            @RequestParam Long managerId) {
+
+        AppraisalResponse response = appraisalService.approveGoals(id, managerId);
+        return ResponseEntity.ok(ApiResponse.success("Goals approved", response));
+    }
+
     // ── Employee: self-assessment draft ──────────────────────────
     // PUT /api/appraisals/{id}/self-assessment/draft?employeeId=1
     @PutMapping("/{id}/self-assessment/draft")

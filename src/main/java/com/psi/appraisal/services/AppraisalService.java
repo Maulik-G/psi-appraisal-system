@@ -27,21 +27,27 @@ public interface AppraisalService {
     // Any role: view one appraisal by ID (with ownership check)
     AppraisalResponse getAppraisalById(Long appraisalId, Long requesterId);
 
-    // Employee: save draft — status stays EMPLOYEE_DRAFT, no notification
+    // Employee: submit goals for approval
+    AppraisalResponse submitGoals(Long appraisalId, Long employeeId);
+
+    // Manager: approve goals — moves status to GOALS_APPROVED
+    AppraisalResponse approveGoals(Long appraisalId, Long managerId);
+
+    // Employee: save draft of self-assessment (status remains unchanged)
     AppraisalResponse saveSelfAssessmentDraft(Long appraisalId, SelfAssessmentRequest request, Long employeeId);
 
-    // Employee: final submit — status moves to SELF_SUBMITTED, notifies manager
+    // Employee: final submit self-assessment — status moves to SELF_SUBMITTED
     AppraisalResponse submitSelfAssessment(Long appraisalId, SelfAssessmentRequest request, Long employeeId);
 
-    // Manager: save draft — status stays MANAGER_DRAFT, no notification
+    // Manager: save draft of review (status remains unchanged)
     AppraisalResponse saveManagerReviewDraft(Long appraisalId, ManagerReviewRequest request, Long managerId);
 
-    // Manager: final submit — status moves to MANAGER_REVIEWED, notifies HR + employee
+    // Manager: final submit review — status moves to MANAGER_REVIEWED
     AppraisalResponse submitManagerReview(Long appraisalId, ManagerReviewRequest request, Long managerId);
 
-    // HR: approve final appraisal — moves status to APPROVED
+    // HR: finalize result — moves status to FINALIZED
     AppraisalResponse approveAppraisal(Long appraisalId, ApproveRequest request);
 
-    // Employee: acknowledge result — moves status to ACKNOWLEDGED
+    // Employee: acknowledge result (status stays FINALIZED or moves to ARCHIVED if applicable)
     AppraisalResponse acknowledgeAppraisal(Long appraisalId, Long employeeId);
 }

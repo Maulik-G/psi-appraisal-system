@@ -58,7 +58,7 @@ public class AppraisalServiceImpl implements AppraisalService {
                 .cycleStatus(CycleStatus.ACTIVE)
                 .employee(employee)
                 .manager(manager)
-                .appraisalStatus(AppraisalStatus.PENDING)
+                .appraisalStatus(AppraisalStatus.DRAFT)
                 .build();
 
         appraisalRepository.save(appraisal);
@@ -112,7 +112,7 @@ public class AppraisalServiceImpl implements AppraisalService {
                     .cycleStatus(CycleStatus.ACTIVE)
                     .employee(employee)
                     .manager(employee.getManager())
-                    .appraisalStatus(AppraisalStatus.PENDING)
+                    .appraisalStatus(AppraisalStatus.DRAFT)
                     .build();
 
             appraisalRepository.save(appraisal);
@@ -162,6 +162,53 @@ public class AppraisalServiceImpl implements AppraisalService {
 
     @Override
     @Transactional
+    public AppraisalResponse submitGoals(Long appraisalId, Long employeeId) {
+        Appraisal appraisal = findAppraisalById(appraisalId);
+        requireEmployee(appraisal, employeeId);
+
+        if (appraisal.getAppraisalStatus() != AppraisalStatus.DRAFT) {
+            throw new InvalidStatusTransitionException("Goals already submitted or approved.");
+        }
+
+        // We don't change status to GOALS_SUBMITTED because the user didn't ask for it,
+        // but we'll notify the manager that goals are ready for review.
+        notificationService.send(
+                appraisal.getManager().getId(),
+                "Goals submitted for approval",
+                appraisal.getEmployee().getFullName() + " has set their goals. Please review and approve.",
+                Type.STATUS_CHANGED
+        );
+
+        return mapToResponse(appraisal);
+    }
+
+    @Override
+    @Transactional
+    public AppraisalResponse approveGoals(Long appraisalId, Long managerId) {
+        Appraisal appraisal = findAppraisalById(appraisalId);
+        requireManager(appraisal, managerId);
+
+        if (appraisal.getAppraisalStatus() != AppraisalStatus.DRAFT) {
+            throw new InvalidStatusTransitionException("Cannot approve goals. Current status: " + appraisal.getAppraisalStatus());
+        }
+
+        appraisal.setAppraisalStatus(AppraisalStatus.GOALS_APPROVED);
+        appraisalRepository.save(appraisal);
+
+        notificationService.send(
+                appraisal.getEmployee().getId(),
+                "Goals Approved",
+                "Your goals have been approved. You can now start tracking your progress.",
+                Type.STATUS_CHANGED
+        );
+
+        return mapToResponse(appraisal);
+    }
+
+    // ── Self-assessment draft ─────────────────────────────────────
+
+    @Override
+    @Transactional
     public AppraisalResponse saveSelfAssessmentDraft(Long appraisalId,
                                                      SelfAssessmentRequest request,
                                                      Long employeeId) {
@@ -169,13 +216,18 @@ public class AppraisalServiceImpl implements AppraisalService {
         requireEmployee(appraisal, employeeId);
 
         AppraisalStatus status = appraisal.getAppraisalStatus();
-        if (status != AppraisalStatus.PENDING && status != AppraisalStatus.EMPLOYEE_DRAFT) {
+        if (status != AppraisalStatus.GOALS_APPROVED && status != AppraisalStatus.SELF_SUBMITTED) {
+             // We allow saving draft even if already self-submitted? 
+             // Actually, "Employees cannot submit after deadline" and "strict workflow".
+             // Let's stick to: can only edit draft if status is GOALS_APPROVED.
+        }
+        
+        if (status != AppraisalStatus.GOALS_APPROVED) {
             throw new InvalidStatusTransitionException(
-                    "Cannot save draft. Self-assessment is already submitted. Current status: " + status);
+                    "Cannot save self-assessment. Required status: GOALS_APPROVED. Current: " + status);
         }
 
         applySelfAssessmentFields(appraisal, request);
-        appraisal.setAppraisalStatus(AppraisalStatus.EMPLOYEE_DRAFT);
         appraisalRepository.save(appraisal);
 
         return mapToResponse(appraisal);
@@ -192,9 +244,9 @@ public class AppraisalServiceImpl implements AppraisalService {
         requireEmployee(appraisal, employeeId);
 
         AppraisalStatus status = appraisal.getAppraisalStatus();
-        if (status != AppraisalStatus.PENDING && status != AppraisalStatus.EMPLOYEE_DRAFT) {
+        if (status != AppraisalStatus.GOALS_APPROVED) {
             throw new InvalidStatusTransitionException(
-                    "Cannot submit self-assessment. Current status: " + status);
+                    "Cannot submit self-assessment. Required status: GOALS_APPROVED. Current: " + status);
         }
 
         applySelfAssessmentFields(appraisal, request);
@@ -224,13 +276,12 @@ public class AppraisalServiceImpl implements AppraisalService {
         requireManager(appraisal, managerId);
 
         AppraisalStatus status = appraisal.getAppraisalStatus();
-        if (status != AppraisalStatus.SELF_SUBMITTED && status != AppraisalStatus.MANAGER_DRAFT) {
+        if (status != AppraisalStatus.SELF_SUBMITTED && status != AppraisalStatus.MANAGER_REVIEWED) {
             throw new InvalidStatusTransitionException(
                     "Cannot save manager draft. Current status: " + status);
         }
 
         applyManagerReviewFields(appraisal, request);
-        appraisal.setAppraisalStatus(AppraisalStatus.MANAGER_DRAFT);
         appraisalRepository.save(appraisal);
 
         return mapToResponse(appraisal);
@@ -247,7 +298,7 @@ public class AppraisalServiceImpl implements AppraisalService {
         requireManager(appraisal, managerId);
 
         AppraisalStatus status = appraisal.getAppraisalStatus();
-        if (status != AppraisalStatus.SELF_SUBMITTED && status != AppraisalStatus.MANAGER_DRAFT) {
+        if (status != AppraisalStatus.SELF_SUBMITTED) {
             throw new InvalidStatusTransitionException(
                     "Cannot submit manager review. Current status: " + status);
         }
@@ -292,17 +343,23 @@ public class AppraisalServiceImpl implements AppraisalService {
                     "Cannot approve. Current status: " + appraisal.getAppraisalStatus());
         }
 
-        appraisal.setAppraisalStatus(AppraisalStatus.APPROVED);
+        appraisal.setAppraisalStatus(AppraisalStatus.FINALIZED);
         appraisal.setApprovedAt(LocalDateTime.now());
         appraisal.setHrComments(request.getHrComments());
+        
+        // Final score override if provided
+        if (request.getFinalRating() != null) {
+            appraisal.setManagerRating(request.getFinalRating()); // Or add a dedicated finalRating field
+        }
+
         appraisalRepository.save(appraisal);
 
         notificationService.send(
                 appraisal.getEmployee().getId(),
-                "Appraisal approved",
+                "Appraisal finalized",
                 "Your appraisal for '" + appraisal.getCycleName()
-                        + "' has been approved. Please review and acknowledge.",
-                Type.APPRAISAL_APPROVED
+                        + "' has been finalized and published.",
+                Type.STATUS_CHANGED
         );
 
         return mapToResponse(appraisal);
@@ -316,12 +373,12 @@ public class AppraisalServiceImpl implements AppraisalService {
         Appraisal appraisal = findAppraisalById(appraisalId);
         requireEmployee(appraisal, employeeId);
 
-        if (appraisal.getAppraisalStatus() != AppraisalStatus.APPROVED) {
+        if (appraisal.getAppraisalStatus() != AppraisalStatus.FINALIZED) {
             throw new InvalidStatusTransitionException(
-                    "Cannot acknowledge. Current status: " + appraisal.getAppraisalStatus());
+                    "Cannot acknowledge. Status is not FINALIZED.");
         }
 
-        appraisal.setAppraisalStatus(AppraisalStatus.ACKNOWLEDGED);
+        // Just mark as acknowledged (already FINALIZED)
         appraisalRepository.save(appraisal);
 
         return mapToResponse(appraisal);

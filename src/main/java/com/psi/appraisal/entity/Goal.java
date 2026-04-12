@@ -41,7 +41,12 @@ public class Goal {
 	private Appraisal appraisal;
 	
 	@ManyToOne(fetch = FetchType.LAZY)
+	@JoinColumn(name = "employee_id", nullable = false)
 	private User employee;
+
+	@ManyToOne(fetch = FetchType.LAZY)
+	@JoinColumn(name = "manager_id", nullable = false)
+	private User manager;
 	
 	@Column(nullable = false, length = 200)
 	private String title;
@@ -49,6 +54,10 @@ public class Goal {
 	@Column(columnDefinition = "TEXT")
 	private String description;
 	
+	@Column(name = "progress", nullable = false)
+	@Builder.Default
+	private Integer progress = 0;
+
 	@Column(name = "progress_percent", nullable = false)
 	@Builder.Default
 	private Integer progressPercent = 0;

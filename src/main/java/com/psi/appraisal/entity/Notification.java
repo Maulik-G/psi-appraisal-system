@@ -20,6 +20,7 @@ public class Notification {
         MANAGER_REVIEW_DONE,
         APPRAISAL_APPROVED,
         FEEDBACK_RECEIVED,
+        STATUS_CHANGED,
         GENERAL
     }
 
