@@ -91,7 +91,7 @@ public class Appraisal {
 	@Enumerated(EnumType.STRING)
 	@Column(name = "appraisal_status", nullable = false, length = 25)
 	@Builder.Default
-	private AppraisalStatus appraisalStatus = AppraisalStatus.PENDING;
+	private AppraisalStatus appraisalStatus = AppraisalStatus.DRAFT;
 	
 	@Column(name = "submitted_at")
 	private LocalDateTime submittedAt;

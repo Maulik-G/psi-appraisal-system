@@ -17,7 +17,7 @@ import org.springframework.stereotype.Service;
 public class EmailServiceImpl implements EmailService {
     private final JavaMailSender mailSender;
 
-    @Value("${spring.mail.username}")
+    @Value("${app.mail.from}")
     private String fromEmail;
 
     // @Async means email sending runs in a background thread

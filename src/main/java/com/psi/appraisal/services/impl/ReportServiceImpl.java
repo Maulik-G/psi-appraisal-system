@@ -35,41 +35,35 @@ public class ReportServiceImpl implements ReportService {
     public CycleSummaryResponse getCycleSummary(String cycleName) {
         List<Object[]> rows = appraisalRepository.countByStatusForCycle(cycleName);
 
-        long pending = 0, employeeDraft = 0, selfSubmitted = 0,
-             managerDraft = 0, managerReviewed = 0, approved = 0, acknowledged = 0;
+        long draft = 0, goalsApproved = 0, selfSubmitted = 0, managerReviewed = 0, finalized = 0;
 
         for (Object[] row : rows) {
             AppraisalStatus status = (AppraisalStatus) row[0];
             long count = (Long) row[1];
             switch (status) {
-                case PENDING          -> pending = count;
-                case EMPLOYEE_DRAFT   -> employeeDraft = count;
+                case DRAFT            -> draft = count;
+                case GOALS_APPROVED   -> goalsApproved = count;
                 case SELF_SUBMITTED   -> selfSubmitted = count;
-                case MANAGER_DRAFT    -> managerDraft = count;
                 case MANAGER_REVIEWED -> managerReviewed = count;
-                case APPROVED         -> approved = count;
-                case ACKNOWLEDGED     -> acknowledged = count;
+                case FINALIZED        -> finalized = count;
             }
         }
 
-        long total = pending + employeeDraft + selfSubmitted + managerDraft
-                   + managerReviewed + approved + acknowledged;
+        long total = draft + goalsApproved + selfSubmitted + managerReviewed + finalized;
 
         double completionPct = total == 0 ? 0.0
-                : Math.round(((approved + acknowledged) * 100.0 / total) * 10.0) / 10.0;
+                : Math.round((finalized * 100.0 / total) * 10.0) / 10.0;
 
         Double avgRating = appraisalRepository.averageManagerRatingForCycle(cycleName);
 
         return CycleSummaryResponse.builder()
                 .cycleName(cycleName)
                 .totalAppraisals(total)
-                .pending(pending)
-                .employeeDraft(employeeDraft)
+                .draft(draft)
+                .goalsApproved(goalsApproved)
                 .selfSubmitted(selfSubmitted)
-                .managerDraft(managerDraft)
                 .managerReviewed(managerReviewed)
-                .approved(approved)
-                .acknowledged(acknowledged)
+                .finalized(finalized)
                 .completionPercentage(completionPct)
                 .averageManagerRating(avgRating != null ? Math.round(avgRating * 10.0) / 10.0 : null)
                 .build();
@@ -103,8 +97,7 @@ public class ReportServiceImpl implements ReportService {
                     pending++;
                     continue;
                 }
-                if (a.getAppraisalStatus() == AppraisalStatus.APPROVED
-                        || a.getAppraisalStatus() == AppraisalStatus.ACKNOWLEDGED) {
+                if (a.getAppraisalStatus() == AppraisalStatus.FINALIZED) {
                     completed++;
                     if (a.getManagerRating() != null) {
                         ratingSum += a.getManagerRating();

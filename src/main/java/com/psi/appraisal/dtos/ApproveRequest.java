@@ -7,5 +7,5 @@ import lombok.Setter;
 @Setter
 public class ApproveRequest {
     private String hrComments;
-    private Double finalRating;
+    private Integer finalRating;
 }

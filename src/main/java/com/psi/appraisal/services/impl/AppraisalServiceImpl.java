@@ -163,23 +163,8 @@ public class AppraisalServiceImpl implements AppraisalService {
     @Override
     @Transactional
     public AppraisalResponse submitGoals(Long appraisalId, Long employeeId) {
-        Appraisal appraisal = findAppraisalById(appraisalId);
-        requireEmployee(appraisal, employeeId);
-
-        if (appraisal.getAppraisalStatus() != AppraisalStatus.DRAFT) {
-            throw new InvalidStatusTransitionException("Goals already submitted or approved.");
-        }
-
-        // We don't change status to GOALS_SUBMITTED because the user didn't ask for it,
-        // but we'll notify the manager that goals are ready for review.
-        notificationService.send(
-                appraisal.getManager().getId(),
-                "Goals submitted for approval",
-                appraisal.getEmployee().getFullName() + " has set their goals. Please review and approve.",
-                Type.STATUS_CHANGED
-        );
-
-        return mapToResponse(appraisal);
+        // Deprecated: Managers now set goals directly.
+        throw new InvalidStatusTransitionException("Goal submission is managed by your manager.");
     }
 
     @Override
@@ -189,7 +174,7 @@ public class AppraisalServiceImpl implements AppraisalService {
         requireManager(appraisal, managerId);
 
         if (appraisal.getAppraisalStatus() != AppraisalStatus.DRAFT) {
-            throw new InvalidStatusTransitionException("Cannot approve goals. Current status: " + appraisal.getAppraisalStatus());
+            throw new InvalidStatusTransitionException("Targets already set. Current status: " + appraisal.getAppraisalStatus());
         }
 
         appraisal.setAppraisalStatus(AppraisalStatus.GOALS_APPROVED);
@@ -197,8 +182,8 @@ public class AppraisalServiceImpl implements AppraisalService {
 
         notificationService.send(
                 appraisal.getEmployee().getId(),
-                "Goals Approved",
-                "Your goals have been approved. You can now start tracking your progress.",
+                "Appraisal Targets Finalized",
+                "Your manager has finalized the targets for this cycle. You can now track your progress.",
                 Type.STATUS_CHANGED
         );
 

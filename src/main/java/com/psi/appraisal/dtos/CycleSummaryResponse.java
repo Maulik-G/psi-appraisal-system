@@ -8,13 +8,11 @@ import lombok.Getter;
 public class CycleSummaryResponse {
     private String cycleName;
     private long totalAppraisals;
-    private long pending;
-    private long employeeDraft;
+    private long draft;
+    private long goalsApproved;
     private long selfSubmitted;
-    private long managerDraft;
     private long managerReviewed;
-    private long approved;
-    private long acknowledged;
+    private long finalized;
     private double completionPercentage;
     private Double averageManagerRating;
 }
