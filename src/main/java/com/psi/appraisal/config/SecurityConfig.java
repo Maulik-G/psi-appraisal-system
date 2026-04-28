@@ -85,7 +85,8 @@ public class SecurityConfig {
         config.setAllowedOrigins(List.of(
                 "https://psi-appraisal-system-frontend.vercel.app/",
                 "http://127.0.0.1:5173",
-                "http://127.0.0.1:5174"));
+                "http://127.0.0.1:5174",
+                "https://2dbc-13-127-254-60.ngrok-free.app"));
         config.setAllowedMethods(List.of("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
         config.setAllowedHeaders(List.of("*"));
         config.setAllowCredentials(true);
